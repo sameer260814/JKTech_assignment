@@ -1,12 +1,21 @@
-import { Exclude } from "class-transformer";
-import { IsOptional } from "class-validator";
+import { Exclude, Expose } from "class-transformer";
 
 export class UserDto {
+    @Expose()
     id: string;
+
+    @Expose()
     name: string;
+
+    @Expose()
     email: string;
 
-    @IsOptional()
+    @Expose()
+    provider?: string;
+
+    @Expose()
+    providerId?: string;
+
     @Exclude()
     password?: string;
 }

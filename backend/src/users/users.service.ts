@@ -15,11 +15,9 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
     try {
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
-      const user = this.userRepo.create({ email: createUserDto.email, name: createUserDto.name, password: hashedPassword });
+      const user = this.userRepo.create({ email: createUserDto.email, name: createUserDto.name, password: createUserDto.password });
       const savedUser = await this.userRepo.save(user);
-      return plainToInstance(UserDto, savedUser);
+      return plainToInstance(UserDto, savedUser, { excludeExtraneousValues: true });
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`User with email ${createUserDto.email} already exists`);
@@ -34,7 +32,12 @@ export class UsersService {
 
   async getUserById(id: string): Promise<UserDto> {
     const user = this.userRepo.findOne({ where: { id }, relations: ['posts'] });
-    return plainToInstance(UserDto, user);
+    return plainToInstance(UserDto, user, { excludeExtraneousValues: true });
+  }
+
+  async getUserByEmail(email: string): Promise<UserDto> {
+    const user = await this.userRepo.findOne({ where: { email } });
+    return plainToInstance(UserDto, user)
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
